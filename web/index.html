@@ -2,35 +2,30 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>GHOST // NULLBYTE CORE</title>
-
+<title>GHOST // ELLIOT CORE</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div id="scanlines"></div>
+<canvas id="net"></canvas>
+<div id="scan"></div>
 
-<div class="container">
+<div class="ui">
 
     <div class="header">
-        GHOST <span>v0.2</span>
-    </div>
-
-    <div class="sub">
-        Neural Interface Active — User: NullByte
+        GHOST <span>// neural interface active</span>
     </div>
 
     <div id="terminal"></div>
 
     <div class="inputBox">
-        <input id="input" placeholder="Digite um comando..." />
-        <button onclick="send()">ENTER</button>
+        <input id="input" placeholder="NullByte..." />
+        <button onclick="send()">EXEC</button>
     </div>
 
 </div>
 
 <script src="ghost.js"></script>
-
 </body>
 </html>
