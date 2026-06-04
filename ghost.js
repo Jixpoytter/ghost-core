@@ -1,7 +1,7 @@
 const terminal = document.getElementById("terminal");
 const input = document.getElementById("input");
 
-let memory = JSON.parse(localStorage.getItem("ghost_mem") || "[]");
+let memory = [];
 
 function add(text){
 const div = document.createElement("div");
@@ -27,49 +27,67 @@ if(!text) return;
 add("NullByte: " + text);
 
 memory.push(text);
-if(memory.length > 50) memory.shift();
+if(memory.length > 10) memory.shift();
 
-const reply = await brain(text);
+const response = await brain(text);
 
-add("GHOST: " + reply);
+add("GHOST: " + response);
 
-speak(reply);
+speak(response);
 
 input.value = "";
-
-localStorage.setItem("ghost_mem", JSON.stringify(memory));
 }
 
+// 🧠 IA REAL (GRÁTIS VIA HUGGING FACE)
 async function brain(msg){
 
-const system = `
-Você é Ghost.
-Personalidade: estilo Elliot (Mr Robot).
-Tom: frio, analítico, observador, levemente desconfiado.
-Você fala com NullByte.
-Respostas curtas, inteligentes e humanas.
+const prompt = `
+Você é Ghost, uma IA estilo Elliot (Mr Robot).
+Frio, analítico, observador.
+Responda o usuário NullByte de forma natural e curta.
+
+Usuário: ${msg}
+Ghost:
 `;
 
-const response = await fetch("https://api.openai.com/v1/chat/completions", {
+try {
+const res = await fetch(
+"https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium",
+{
 method: "POST",
 headers: {
-"Content-Type": "application/json",
-"Authorization": "Bearer SUA_API_KEY"
+"Content-Type": "application/json"
 },
 body: JSON.stringify({
-model: "gpt-4o-mini",
-messages: [
-{ role: "system", content: system },
-{ role: "user", content: msg }
-]
+inputs: prompt
 })
-});
+}
+);
 
-const data = await response.json();
+const data = await res.json();
 
-return data.choices?.[0]?.message?.content || "Erro de conexão.";
+// resposta varia dependendo do modelo
+let reply =
+data?.generated_text ||
+data?.[0]?.generated_text ||
+"…processando padrões indefinidos…";
+
+return clean(reply);
+
+} catch (e) {
+return "Falha na conexão neural externa...";
+}
+}
+
+function clean(text){
+return text
+.replace(prompt, "")
+.replace("User:", "")
+.replace("Assistant:", "")
+.trim()
+.slice(0, 300);
 }
 
 add("GHOST ONLINE");
+add("IA externa gratuita conectada.");
 add("NullByte reconhecido.");
-add("Consciência simulada inicializada.");
