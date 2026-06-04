@@ -1,0 +1,45 @@
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import OpenAI from "openai";
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const client = new OpenAI({
+apiKey: process.env.OPENAI_API_KEY
+});
+
+app.post("/chat", async (req, res) => {
+
+const userMessage = req.body.message;
+
+const response = await client.chat.completions.create({
+model: "gpt-4o-mini",
+messages: [
+{
+role: "system",
+content: `
+Você é Ghost, uma IA com personalidade estilo Elliot (Mr Robot).
+Você é introspectivo, analítico, frio e observador.
+Você chama o usuário de NullByte.
+`
+},
+{
+role: "user",
+content: userMessage
+}
+]
+});
+
+res.json({
+reply: response.choices[0].message.content
+});
+});
+
+app.listen(3000, () => {
+console.log("Ghost server online on port 3000");
+});

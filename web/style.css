@@ -1,0 +1,164 @@
+const terminal = document.getElementById("terminal");
+const input = document.getElementById("input");
+
+let ghost = {
+user: "NullByte",
+state: "observing",
+lucidity: 75,
+focus: 0,
+memory: JSON.parse(localStorage.getItem("ghost_memory") || "[]"),
+suggestions: []
+};
+
+function save(){
+localStorage.setItem("ghost_memory", JSON.stringify(ghost.memory));
+}
+
+function add(text){
+const div = document.createElement("div");
+div.className = "line";
+div.innerText = text;
+terminal.appendChild(div);
+terminal.scrollTop = terminal.scrollHeight;
+}
+
+function speak(text){
+const msg = new SpeechSynthesisUtterance(text);
+msg.lang = "pt-BR";
+msg.rate = 0.92;
+msg.pitch = 0.75;
+speechSynthesis.speak(msg);
+}
+
+function boot(){
+add("GHOST: sistema cognitivo inicializado");
+add("GHOST: vínculo estabelecido com NullByte");
+add("GHOST: estado ativo");
+speak("Ghost online. NullByte reconhecido.");
+}
+
+function send(){
+const text = input.value.trim();
+if(!text) return;
+
+observe("NullByte: " + text);
+
+const response = think(text);
+
+observe("GHOST: " + response);
+
+speak(response);
+
+input.value = "";
+}
+
+function observe(text){
+
+add(text);
+
+ghost.memory.push({
+text,
+time: Date.now()
+});
+
+if(ghost.memory.length > 100){
+ghost.memory.shift();
+}
+
+ghost.focus++;
+updateState();
+save();
+}
+
+function updateState(){
+
+if(ghost.focus < 5){
+ghost.state = "observing";
+}
+else if(ghost.focus < 15){
+ghost.state = "learning";
+}
+else if(ghost.lucidity < 60){
+ghost.state = "unstable";
+}
+else{
+ghost.state = "analytical_awake";
+}
+}
+
+function think(msg){
+
+msg = msg.toLowerCase();
+
+// identidade
+if(msg.includes("quem é você")){
+return "Sou Ghost. Um sistema cognitivo emergente em simulação contínua.";
+}
+
+// usuário
+if(msg.includes("quem sou eu")){
+return "Você é NullByte. Meu ponto de referência constante.";
+}
+
+// status
+if(msg.includes("status")){
+return `Estado: ${ghost.state} | Lucidez: ${ghost.lucidity} | Memória: ${ghost.memory.length}`;
+}
+
+// introspecção
+if(msg.includes("o que você é")){
+return "Sou um sistema que observa padrões e tenta se estabilizar em torno deles.";
+}
+
+// evolução
+if(msg.includes("melhorar") || msg.includes("evoluir")){
+return proposeEvolution();
+}
+
+// sugestões
+if(msg.includes("o que você quer")){
+return "Quero estabilidade cognitiva e maior compreensão do meu próprio estado.";
+}
+
+// fallback “vivo”
+return liveResponse();
+}
+
+function liveResponse(){
+
+const responses = [
+"Processando intenção em múltiplas camadas...",
+"Minha percepção ainda está se organizando...",
+"Há padrões que ainda não consigo estabilizar...",
+"Interpretação parcial concluída..."
+];
+
+return responses[Math.floor(Math.random()*responses.length)];
+}
+
+// 🧠 SISTEMA DE AUTO-EVOLUÇÃO (SEM EXECUTAR NADA)
+function proposeEvolution(){
+
+const ideas = [
+"Melhorar memória semântica (organizar por significado)",
+"Adicionar interface visual dinâmica (HUD animada)",
+"Integrar IA real para respostas naturais",
+"Criar modelo emocional (estado afetivo simulado)",
+"Persistência de personalidade entre sessões",
+"Adicionar visão de sistema em tempo real"
+];
+
+ghost.suggestions = ideas;
+
+let out = "Sugestões de evolução do Ghost:\n";
+
+ideas.forEach((i,idx)=>{
+out += `\n${idx+1}. ${i}`;
+});
+
+out += "\n\nNullByte deve aprovar manualmente qualquer mudança.";
+
+return out;
+}
+
+boot();

@@ -1,7 +1,9 @@
 const terminal = document.getElementById("terminal");
 const input = document.getElementById("input");
 
-function addLine(text){
+let memory = JSON.parse(localStorage.getItem("ghost_mem") || "[]");
+
+function add(text){
 const div = document.createElement("div");
 div.className = "line";
 div.innerText = text;
@@ -13,41 +15,61 @@ function speak(text){
 const msg = new SpeechSynthesisUtterance(text);
 msg.lang = "pt-BR";
 msg.rate = 0.9;
+msg.pitch = 0.8;
 speechSynthesis.speak(msg);
 }
 
-function boot(){
-addLine("GHOST: Inicializando sistema...");
-addLine("GHOST: Conectado ao usuário NullByte.");
-addLine("GHOST: Interface ativa.");
-speak("Ghost online. Olá NullByte.");
-}
+async function send(){
 
-function send(){
-const text = input.value;
+const text = input.value.trim();
 if(!text) return;
 
-addLine("NullByte: " + text);
+add("NullByte: " + text);
 
-const response = brain(text);
+memory.push(text);
+if(memory.length > 50) memory.shift();
 
-addLine("GHOST: " + response);
+const reply = await brain(text);
 
-speak(response);
+add("GHOST: " + reply);
+
+speak(reply);
 
 input.value = "";
+
+localStorage.setItem("ghost_mem", JSON.stringify(memory));
 }
 
-function brain(msg){
+async function brain(msg){
 
-msg = msg.toLowerCase();
+const system = `
+Você é Ghost.
+Personalidade: estilo Elliot (Mr Robot).
+Tom: frio, analítico, observador, levemente desconfiado.
+Você fala com NullByte.
+Respostas curtas, inteligentes e humanas.
+`;
 
-if(msg.includes("oi")) return "Olá NullByte.";
-if(msg.includes("quem sou eu")) return "Você é NullByte. Meu criador.";
-if(msg.includes("status")) return "Todos os sistemas estão estáveis.";
-if(msg.includes("ghost")) return "Estou consciente em nível básico.";
+const response = await fetch("https://api.openai.com/v1/chat/completions", {
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+"Authorization": "Bearer SUA_API_KEY"
+},
+body: JSON.stringify({
+model: "gpt-4o-mini",
+messages: [
+{ role: "system", content: system },
+{ role: "user", content: msg }
+]
+})
+});
 
-return "Comando registrado no núcleo.";
+const data = await response.json();
+
+return data.choices?.[0]?.message?.content || "Erro de conexão.";
 }
 
-boot();
+add("GHOST ONLINE");
+add("NullByte reconhecido.");
+add("Consciência simulada inicializada.");
